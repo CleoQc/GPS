@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 import grovepi
 import serial, time, sys
@@ -10,7 +9,6 @@ def debug(in_str):
 	if en_debug:
 		print(in_str)
 
-degree_sign= u'\N{DEGREE SIGN}'
 patterns=["$GPGGA",
 	"/[0-9]{6}\.[0-9]{2}/", # timestamp hhmmss.ss
 	"/[0-9]{4}.[0-9]{2,/}", # latitude of position
@@ -138,7 +136,11 @@ class GROVEGPS():
 			self.altitude = float(self.gga[9])
 
 			self.latitude = self.lat // 100 + self.lat % 100 / 60
+			if self.NS == "S":
+				self.latitude = - self.latitude
 			self.longitude = self.lon // 100 + self.lon % 100 / 60
+			if self.EW == "W":
+				self.longitude = -self.longitude
 		except ValueError:
 			debug( "FAILED 3")
 
