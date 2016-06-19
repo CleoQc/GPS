@@ -45,7 +45,7 @@ class GROVEGPS():
 		after 50 attemps to reach GPS
 		'''
 		self.timestamp = ""
-		self.lat = -1.0
+		self.lat = -1.0    # degrees minutes and decimals of minute
 		self.NS = ""
 		self.lon = -1.0
 		self.EW = ""
@@ -53,8 +53,9 @@ class GROVEGPS():
 		self.satellites = -1
 		self.altitude = -1.0
 
-		self.latitude = -1.0
+		self.latitude = -1.0  #degrees and decimals
 		self.longitude = -1.0
+		self.fancylat = ""  #
 		
 	def get_date(self):
 		'''
