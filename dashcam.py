@@ -5,24 +5,39 @@ import grove_rgb_lcd as lcd
 import grovegps
 import time
 import picamera
-import atexit
+import atexit,sys
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime,timedelta
 
 ###############################################
 @atexit.register
 def cleanup():
-	fobj.close()
-	grovepi.digitalWrite(led,0)
-	lcd.setText("")
+	print ("Cleanup")
+	try:
+		fobj.close()
+		grovepi.digitalWrite(led,0)
+		lcd.setText("")
+	except:
+		pass
 ###############################################
+
+###################################
+# LED on D3
+# DHT on D7
+# LCD on A0
+# GPS on RPISER
+###################################
+
 	
 overlay_txt_ypos = 440
 #degree_sign= u'\N{DEGREE SIGN}'
-g = grovegps.GROVEGPS()
-cam = picamera.PiCamera()
+try:
+	g = grovegps.GROVEGPS()
+	cam = picamera.PiCamera()
+except:
+	pass
 print "time.altzone %d " % time.altzone
-photo_location = "./"
+photo_location = "/home/pi/grove_gps/"
 logfile="trip.csv"
 led = 3
 dht_sensor_port = 7
@@ -36,9 +51,14 @@ fnt = ImageFont.truetype('/usr/share/fonts/truetype/roboto/Roboto-Thin.ttf', 20)
 
 def display(in_str,bgcol=(255,255,255),in_lcd=use_lcd):
 	print(in_str)
-	if in_lcd:
-		lcd.setRGB(bgcol[0],bgcol[1],bgcol[2])
-		lcd.setText(in_str)
+	try:
+		if in_lcd:
+			lcd.setRGB(bgcol[0],bgcol[1],bgcol[2])
+			lcd.setText(in_str)
+	except KeyboardInterrupt:
+		sys.exit()
+	except:
+		pass
 
 def format_coord(in_lat, in_lon):
 	'''
@@ -58,11 +78,16 @@ def handlegpsdata():
 	else return False
 	'''
 
-	g.read()
-	if g.lat != -1.0:
-		display( "valid",in_lcd=False)
-		return True
+	try:
+		g.read()
+		if g.lat != -1.0:
+			display( "valid",in_lcd=False)
+			return True
 
+	except KeyboardInterrupt:
+		sys.exit()
+	except:
+		pass
 	display( "invalid",in_lcd=False)
 	return False
 	
@@ -72,11 +97,16 @@ def handledhtdata():
 	display("temp = {}C    humidity={}%".format(temp,hum),(0,255,0))
 
 def logtofile():
-	fobj = open( logfile,"a")
-	fobj.write("{:.4f}, {:.4f}, {}, {:.2f}, {:.2f}%\n".format(
-		g.latitude,g.longitude, g.timestamp, temp,hum))
-	fobj.flush()
-	fobj.close()
+	try:
+		fobj = open( logfile,"a")
+		fobj.write("{:.4f}, {:.4f}, {}, {:.2f}, {:.2f}%\n".format(
+			g.latitude,g.longitude, g.timestamp, temp,hum))
+		fobj.flush()
+		fobj.close()
+	except KeyboardInterrupt:
+		sys.exit()
+	except:
+		pass
 
 	# handle time. Convert according to timezone
 	# convert timestamp to struct_time
@@ -84,44 +114,49 @@ def logtofile():
 	#print my_time
 
 def savephoto():
-	photoname = photo_location+str(g.timestamp)+".jpg"
-	display( photoname,in_lcd=False)
-	cam.capture(photoname)
-	grovepi.digitalWrite(led,0)
-	time.sleep(1)
-	grovepi.digitalWrite(led,255)
+	try:
+		photoname = photo_location+str(g.timestamp)+".jpg"
+		display( photoname,in_lcd=False)
+		cam.capture(photoname)
+		grovepi.digitalWrite(led,0)
+		time.sleep(1)
+		grovepi.digitalWrite(led,255)
+			
+		# Get ready to watermark the image
 		
-	# Get ready to watermark the image
-	
-	# 1. grab the image
-	base = Image.open(photoname).convert('RGBA')
+		# 1. grab the image
+		base = Image.open(photoname).convert('RGBA')
 
-	# 2. create overlay
-	txt = Image.new('RGBA', base.size, (255,255,255,50))
-	# get a drawing context
-	d = ImageDraw.Draw(txt)
+		# 2. create overlay
+		txt = Image.new('RGBA', base.size, (255,255,255,50))
+		# get a drawing context
+		d = ImageDraw.Draw(txt)
 
-	# 3. prepare text to overlay
-	d.text((20,overlay_txt_ypos), 
-		"lon: {:.4f} lat: {:.4f} temp: {:.1f}C humidity: {:.1f}%".format(
-		g.longitude,g.latitude, temp,hum), font=fnt, fill=(255,255,255,255))
-	
-	# 4. do composite and save
-	out = Image.alpha_composite(base, txt)
-	out.save(photoname)
-	grovepi.digitalWrite(led,255)
+		# 3. prepare text to overlay
+		d.text((20,overlay_txt_ypos), 
+			"lon: {:.4f} lat: {:.4f} temp: {:.1f}C humidity: {:.1f}%".format(
+			g.longitude,g.latitude, temp,hum), font=fnt, fill=(255,255,255,255))
+		
+		# 4. do composite and save
+		out = Image.alpha_composite(base, txt)
+		out.save(photoname)
+		grovepi.digitalWrite(led,255)
+	except KeyboardInterrupt:
+		sys.exit()
+	except:
+		pass
 
 
 
 
 ###############################################################
 
-fobj = open( logfile,"a")
 
-grovepi.digitalWrite(led,255)
+grovepi.digitalWrite(led,0)
 while True:
 
 	if handlegpsdata():
+		grovepi.digitalWrite(led,255)
 		display("{} {}, {} {}, {}, {}".format(g.lat,g.NS,g.lon,g.EW, g.latitude,g.longitude),
 			in_lcd=False)
 		handledhtdata()
@@ -130,5 +165,6 @@ while True:
 		time.sleep(5)
 		display("lon: {:11.7f}lat: {:11.7f}".format(g.longitude,g.latitude),(0,0,255))
 	time.sleep(5)
+	grovepi.digitalWrite(led,0)
 
 
