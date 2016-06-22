@@ -37,8 +37,8 @@ try:
 except:
 	pass
 print "time.altzone %d " % time.altzone
-photo_location = "/home/pi/grove_gps/"
-logfile="trip.csv"
+photo_location = "/media/pi/KINGSTON/"
+logfile="/media/pi/KINGSTON/trip.csv"
 led = 3
 dht_sensor_port = 7
 dht_sensor_type = 0
@@ -99,8 +99,8 @@ def handledhtdata():
 def logtofile():
 	try:
 		fobj = open( logfile,"a")
-		fobj.write("{:.4f}, {:.4f}, {}, {:.2f}, {:.2f}%\n".format(
-			g.latitude,g.longitude, g.timestamp, temp,hum))
+		fobj.write("#{},{:.4f}, {:.4f}, {}, {:.2f}, {:.2f}%\n".format(
+			count,g.latitude,g.longitude, g.timestamp, temp,hum))
 		fobj.flush()
 		fobj.close()
 	except KeyboardInterrupt:
@@ -134,8 +134,8 @@ def savephoto():
 
 		# 3. prepare text to overlay
 		d.text((20,overlay_txt_ypos), 
-			"lon: {:.4f} lat: {:.4f} temp: {:.1f}C humidity: {:.1f}%".format(
-			g.longitude,g.latitude, temp,hum), font=fnt, fill=(255,255,255,255))
+			"#{}: lon: {:.4f} lat: {:.4f} temp: {:.1f}C humidity: {:.1f}%".format(
+			count,g.longitude,g.latitude, temp,hum), font=fnt, fill=(255,255,255,255))
 		
 		# 4. do composite and save
 		out = Image.alpha_composite(base, txt)
@@ -153,9 +153,11 @@ def savephoto():
 
 
 grovepi.digitalWrite(led,0)
+count = 0
 while True:
 
 	if handlegpsdata():
+		count += 1
 		grovepi.digitalWrite(led,255)
 		display("{} {}, {} {}, {}, {}".format(g.lat,g.NS,g.lon,g.EW, g.latitude,g.longitude),
 			in_lcd=False)
