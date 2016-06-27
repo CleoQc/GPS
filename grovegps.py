@@ -116,14 +116,14 @@ class GROVEGPS():
 			pass
 
 		if len(self.gga) != 15:
-			debug ("Failed ")
+			debug ("Failed: wrong number of parameters ")
 			debug (self.gga)
 			return False
 		
 		for i in range(len(self.validation)-1):	
 			test = self.validation[i].match(self.gga[i])
 			if test == False:
-				debug ("Failed 2 on %d"%i)
+				debug ("Failed: wrong format on parameter %d"%i)
 				return False
 
 		try:
@@ -143,7 +143,7 @@ class GROVEGPS():
 			if self.EW == "W":
 				self.longitude = -self.longitude
 		except ValueError:
-			debug( "FAILED 3")
+			debug( "FAILED: invalid value")
 
 		return True
 

@@ -94,12 +94,15 @@ def handlegpsdata():
 def handledhtdata():
 	global temp, hum
 	[ temp, hum ] = grovepi.dht(dht_sensor_port,dht_sensor_type)
-	display("temp = {}C    humidity={}%".format(temp,hum),(0,255,0))
+	if temp != -1 and hum != -1:
+		display("temp = {}C    humidity={}%".format(temp,hum),(0,255,0))
+	else:	
+		dispplay("Error reading DTH sensor")
 
 def logtofile():
 	try:
 		fobj = open( logfile,"a")
-		fobj.write("#{},{:.4f}, {:.4f}, {}, {:.2f}, {:.2f}%\n".format(
+		fobj.write("#{:3d},{:.4f}, {:.4f}, {}, {:.2f}, {:.2f}%\n".format(
 			count,g.latitude,g.longitude, g.timestamp, temp,hum))
 		fobj.flush()
 		fobj.close()
