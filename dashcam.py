@@ -14,40 +14,33 @@ from datetime import datetime,timedelta
 def cleanup():
 	print ("Cleanup")
 	try:
-		fobj.close()
 		grovepi.digitalWrite(led,0)
 		lcd.setText("")
+		fobj.close()
 	except:
 		pass
 ###############################################
 
-###################################
-# LED on D3
-# DHT on D7
-# LCD on A0
+###############################################
+# LED on D7 # only for big brother GrovePi  
+# DHT on D3
+# LCD on I2C
 # GPS on RPISER
-###################################
-
-	
-overlay_txt_ypos = 440
-#degree_sign= u'\N{DEGREE SIGN}'
-try:
-	g = grovegps.GROVEGPS()
-	cam = picamera.PiCamera()
-except:
-	pass
-print "time.altzone %d " % time.altzone
-photo_location = "/media/pi/KINGSTON/"
-logfile="/media/pi/KINGSTON/trip.csv"
-led = 3
-dht_sensor_port = 7
+###############################################
+# Variables - adapt as needed
+###############################################
+photo_location = "/media/pi/KINGSTON1/"
+logfile=photo_location+"trip.csv"
+led = 7
+dht_sensor_port = 3
 dht_sensor_type = 0
 temp = 0
 hum = 0
 use_lcd = True  # if lcd display is used for feedback
+overlay_txt_ypos = 440
+#degree_sign= u'\N{DEGREE SIGN}'
+###################################
 
-# get a font
-fnt = ImageFont.truetype('/usr/share/fonts/truetype/roboto/Roboto-Thin.ttf', 20)
 
 def display(in_str,bgcol=(255,255,255),in_lcd=use_lcd):
 	print(in_str)
@@ -74,7 +67,7 @@ def handlegpsdata():
 	'''
 	Read GPS
 	if we get valid data, blink the LED, return True
-						and save the info
+			and save the info
 	else return False
 	'''
 
@@ -88,7 +81,7 @@ def handlegpsdata():
 		sys.exit()
 	except:
 		pass
-	display( "invalid",in_lcd=False)
+	display( "invalid",in_lcd=True)
 	return False
 	
 def handledhtdata():
@@ -155,7 +148,21 @@ def savephoto():
 ###############################################################
 
 
-grovepi.digitalWrite(led,0)
+try:
+	lcd.setText("Starting up...")
+	grovepi.digitalWrite(led,0)
+except:
+	pass
+
+# check camera
+try:
+	g = grovegps.GROVEGPS()
+	cam = picamera.PiCamera()
+except:
+	display("Camera not working",in_lcd=True)
+
+# get a font
+fnt = ImageFont.truetype('/usr/share/fonts/truetype/roboto/Roboto-Thin.ttf', 20)
 count = 0
 while True:
 
