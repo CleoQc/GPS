@@ -15,6 +15,7 @@ def cleanup():
 	print ("Cleanup")
 	try:
 		grovepi.digitalWrite(led,0)
+		lcd.setRGB(0,0,0)
 		lcd.setText("")
 		fobj.close()
 	except:
@@ -29,7 +30,7 @@ def cleanup():
 ###############################################
 # Variables - adapt as needed
 ###############################################
-photo_location = "/media/pi/KINGSTON1/"
+photo_location = "/media/KINGSTON/"
 logfile=photo_location+"trip.csv"
 led = 7
 dht_sensor_port = 3
@@ -74,14 +75,14 @@ def handlegpsdata():
 	try:
 		g.read()
 		if g.lat != -1.0:
-			display( "valid",in_lcd=False)
+			display( "valid GPS data",in_lcd=False)
 			return True
 
 	except KeyboardInterrupt:
 		sys.exit()
 	except:
 		pass
-	display( "invalid",in_lcd=True)
+	display( "invalid GPS data",in_lcd=True)
 	return False
 	
 def handledhtdata():
@@ -90,7 +91,7 @@ def handledhtdata():
 	if temp != -1 and hum != -1:
 		display("temp = {}C    humidity={}%".format(temp,hum),(0,255,0))
 	else:	
-		dispplay("Error reading DTH sensor")
+		display("Error reading DTH sensor")
 
 def logtofile():
 	try:
@@ -102,7 +103,8 @@ def logtofile():
 	except KeyboardInterrupt:
 		sys.exit()
 	except:
-		pass
+		display("Error writing to USB Drive",in_lcd=True)
+		time.sleep(3)
 
 	# handle time. Convert according to timezone
 	# convert timestamp to struct_time
@@ -140,7 +142,8 @@ def savephoto():
 	except KeyboardInterrupt:
 		sys.exit()
 	except:
-		pass
+		display("Error saving photo",in_lcd=True)
+		time.sleep(3)
 
 
 
@@ -149,7 +152,7 @@ def savephoto():
 
 
 try:
-	lcd.setText("Starting up...")
+	display("Starting up...",in_lcd=True)
 	grovepi.digitalWrite(led,0)
 except:
 	pass
@@ -157,9 +160,10 @@ except:
 # check camera
 try:
 	g = grovegps.GROVEGPS()
-	cam = picamera.PiCamera()
+	cam = picamera.PiCamera(sensor_mode=3)
+	display("Camera working",in_lcd=True)
 except:
-	display("Camera not working",in_lcd=True)
+	display("Camera NOT working!!",in_lcd=True)
 
 # get a font
 fnt = ImageFont.truetype('/usr/share/fonts/truetype/roboto/Roboto-Thin.ttf', 20)
