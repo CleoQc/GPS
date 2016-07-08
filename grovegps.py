@@ -3,7 +3,7 @@ import grovepi
 import serial, time, sys
 import re
 
-en_debug = True
+en_debug = False
 
 def debug(in_str):
 	if en_debug:
