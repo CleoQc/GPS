@@ -2,7 +2,7 @@
 
 import grovepi
 import grove_rgb_lcd as lcd
-import grovegps
+import dextergps
 import time
 import picamera
 import atexit,sys

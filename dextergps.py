@@ -3,7 +3,7 @@ import grovepi
 import serial, time, sys
 import re
 
-en_debug = False
+en_debug = True
 
 def debug(in_str):
 	if en_debug:
@@ -121,10 +121,15 @@ class GROVEGPS():
 			return False
 		
 		for i in range(len(self.validation)-1):	
+			if len(self.gga[i]) == 0:
+				debug ("Failed: empty string %d"%i)
+				return False
 			test = self.validation[i].match(self.gga[i])
 			if test == False:
 				debug ("Failed: wrong format on parameter %d"%i)
 				return False
+			else:
+				debug("Passed %d"%i)
 
 		try:
 			self.timestamp = self.gga[1]
@@ -154,4 +159,4 @@ if __name__ =="__main__":
 		time.sleep(1)
 		in_data = gps.read()
 		if in_data != []:
-			print("Valid")
+			print in_data
